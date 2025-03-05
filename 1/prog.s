@@ -23,43 +23,43 @@ _start:
     mov r9b, byte [e]
     or r9b, r9b
     jz division_by_zero_error
+    ;проверки пройдены
 
-    mov rax, rsi
-    cqo
-    movsx rbx, ebx
-    idiv rbx ;результат 64 бита в rax
-
+    mov eax, edi
+    cdq
+    idiv ebx ;результат 32 бита в eax, остаток в edx
     movsx rdi, edi
-    imul rax, rdi
+    imul rax, rsi
     jo overflow_error
     mov rsp, 0
     mov rsp, rax
     ;норм
 
-    mov eax, ebx
-    cdq
-    movsx ecx, r9b
-    idiv ecx ;результат 32 бита в eax
+    mov ax, r8w
+    movsx cx, r9b
+    cwd
+    idiv cx ;результат 16 бит в ax
+    cwde ;результат 32(16) бит в eax
+    imul ebx ;результат в edx:eax
+    mov ecx, eax
+    sal rdx, 32
+    or rdx, rcx ;результат 64(48) бит в rdx
 
-    cdqe ;результат в rax
-    movsx rcx, r8w
-    imul rcx ;результат не более 48 бит в rax
-
-    add rsp, rax
+    add rsp, rdx
+    jo overflow_error
     ;норм
 
+    mov eax, edi
+    movsx ecx, r8w
+    imul ecx ;результат 48 бит в edx:eax
+    mov ecx, eax
+    sal rdx, 32
+    or rdx, rcx ;результат 64(48) бит в rdx
+    mov r10, rdx
     mov rax, rsi
     cqo
-    movsx rcx, edi
-    idiv rcx
-    mov r11, rax ;результат 64 бита в r11
-
-    mov rax, rsi
-    cqo
-    movsx rcx, r8w
-    idiv rcx ;результат в rax
-
-    imul r11;
+    idiv r10 ;результат в rax
+    imul rsi
     jo overflow_error
 
     sub rsp, rax
