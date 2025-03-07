@@ -1,9 +1,9 @@
 section .data
-    a dd 10
-    b dd 3
-    c dq 8
-    d dw -6
-    e db -2
+    a dd 1
+    b dd 1
+    c dq 0x40000000
+    d dw -1
+    e db -1
     result dq 0
 
 section .text
@@ -33,7 +33,6 @@ _start:
     jo overflow_error
     mov rsp, 0
     mov rsp, rax
-    ;норм
 
     mov ax, r8w
     movsx cx, r9b
@@ -47,7 +46,6 @@ _start:
 
     add rsp, rdx
     jo overflow_error
-    ;норм
 
     mov eax, edi
     movsx ecx, r8w
@@ -63,7 +61,7 @@ _start:
     jo overflow_error
 
     sub rsp, rax
-    ;норм
+    jo overflow_error
 
     mov qword [result], rsp
 
