@@ -2,7 +2,7 @@ AS = /usr/bin/nasm
 LD = /usr/bin/ld
 
 ASFLAGS = -g -f elf64
-LDFLAGS = -static
+LDFLAGS = -g -static
 
 SRCS = prog.s
 OBJS = $(SRCS:.s=.o)
