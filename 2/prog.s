@@ -43,6 +43,7 @@ _start:
 init_ptrs_n_sums:
     mov [rdi + r8 * 8], rbx
     call calc_sum ; вычисление суммы r8-й строки
+    mov [rdx + r8 * 8], rax
     add rbx, r10
     inc r8
     loop init_ptrs_n_sums
@@ -56,6 +57,7 @@ heap_sort:
     mov rbx, row_ptrs
     ; rbx - ptrs
 
+    mov esi, [n]
     shr rsi, 1
 
 outer_cycle:
@@ -175,9 +177,9 @@ upload_elem:
     add rdi, 8 ; увеличили адрес вставки
     add rsi, 8
     loop upload_elem
-    pop rcx
     pop rsi
-    add rsi, r8
+    pop rcx
+    add rsi, 8
     loop upload_line
 
 exit_program:
