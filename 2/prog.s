@@ -3,7 +3,6 @@ bits 64
 ; Пирамидальная сортировка строк матрицы по сумме элементов
 
 section .data
-    align 8
     n: db 5
     m: db 5
     sort_order db 1  ; 1 - по возрастанию, 0 - по убыванию
@@ -15,6 +14,7 @@ section .data
           dq 21, 25, 22, 23, 24
 
     row_ptrs: dq 0, 0, 0, 0, 0
+    row_sums: dq 0, 0, 0, 0, 0
 
 section .text
     global _start
@@ -45,7 +45,6 @@ exit_program:
     mov rax, 60
     xor rdi, rdi
     syscall
-
 
 heapify:
     push rbp
