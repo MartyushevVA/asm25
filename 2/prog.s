@@ -3,15 +3,21 @@ bits 64
 ; Пирамидальная сортировка строк матрицы по сумме элементов
 
 section .data
-    n: db 5
-    m: db 5
-    sort_order db 1  ; 1 - по возрастанию, 0 - по убыванию
+    n: dd 5
+    m: dd 5
+    sort_order dd 1  ; 1 - по возрастанию, 0 - по убыванию
 
     matr: dq 12, 7,  3,  9,  15
           dq 5,  11, 8,  2,  14
           dq 1,  10, 6,  13, 4
           dq 18, 17, 16, 20, 19
           dq 21, 25, 22, 23, 24
+
+    res_m: dq 0, 0, 0, 0, 0
+         dq 0, 0, 0, 0, 0
+         dq 0, 0, 0, 0, 0
+         dq 0, 0, 0, 0, 0
+         dq 0, 0, 0, 0, 0
 
     row_ptrs: dq 0, 0, 0, 0, 0
     row_sums: dq 0, 0, 0, 0, 0
@@ -21,156 +27,160 @@ section .text
 
 _start:
     mov rbx, matr
-    lea rdi, [row_ptrs]
-    movzx rcx, byte[n]
-	dec rcx
+    mov ecx, [n]
+	mov rdi, rcx
+    dec rdi
 	jle exit_program
-	inc rcx
+
+    push rdi
+    mov rdi, row_ptrs
+    mov rdx, row_sums
     xor r8, r8
 
-	movzx rax, byte [m]
-    shl rax, 3
+    mov r10d, [n]
+    shl r10, 3
 
-init_ptrs:
+init_ptrs_n_sums:
     mov [rdi + r8 * 8], rbx
-    add rbx, rax
+    call calc_sum ; вычисление суммы r8-й строки
+    add rbx, r10
     inc r8
-    loop init_ptrs
-    
-    lea rsi, [row_ptrs]
-    movzx rcx, byte[n]
-    call heap_sort
+    loop init_ptrs_n_sums
+    ; массивы указателей и сумм заполнены
+    ; rsi - n
+    ; rdx - sums
+    ; r10 - n*8 - размер строки
+
+heap_sort:
+    pop rdi ; rdi - индекс последней строки
+    mov rbx, row_ptrs
+    ; rbx - ptrs
+
+    shr rsi, 1
+
+outer_cycle:
+    or rsi, rsi
+    jnz dec_rsi
+    cmp rdi, 1
+    jz first_second_comp
+
+    mov rax, [rbx]
+    xchg rax, [rbx + rdi * 8]
+    mov [rbx], rax
+
+    mov rax, [rdx]
+    xchg rax, [rdx + rdi * 8]
+    mov [rdx], rax
+
+    dec rdi
+    jmp next_elem
+
+dec_rsi:
+    dec rsi
+
+next_elem:
+    mov r11, [rbx + rsi * 8]
+    mov r12, [rdx + rsi * 8]
+    push rsi
+    mov rcx, rsi
+
+check:
+    shl rcx, 1
+    inc rcx ; rcx - на левом потомке
+    cmp rcx, rdi
+    je succ_comp
+    jg curr_save
+
+    mov r10, [rdx + rcx * 8]
+    cmp r10, [rdx + rcx * 8 + 8]
+    jge succ_comp
+    inc rcx
+
+succ_comp:
+    cmp r12, [rdx + rcx * 8]
+    jge curr_save
+
+    mov r10, [rbx + rcx * 8]
+    mov [rbx + rsi * 8], r10
+
+    mov r10, [rdx + rcx * 8]
+    mov [rdx + rsi * 8], r10
+
+    mov rsi, rcx
+    jmp check
+
+curr_save:
+    mov [rbx + rsi * 8], r11
+    mov [rdx + rsi * 8], r12
+    pop rsi
+    jmp outer_cycle
+
+calc_sum:
+    push rbp
+    mov rbp, rsp
+
+    push rcx
+    push rdx
+    ; rax - результат
+    ; rbx - начало строки
+    ; rcx - количесвто элементов в строке
+    ; rdx - индекс элемента
+    xor rax, rax
+    xor rdx, rdx
+    mov ecx, [m]
+
+sum_line:
+    add rax, [rbx + rdx * 8]
+    jo overflow_error
+    inc rdx
+    loop sum_line
+
+    pop rdx
+    pop rcx
+    pop rbp
+    ret
+
+overflow_error:
+    mov rax, 60
+    mov rdi, 1
+    syscall
+
+first_second_comp:
+    mov rax, [rdx]
+    cmp rax, [rdx + 8]
+    jle exit_program
+    mov rax, [rbx]
+    xchg rax, [rbx + 8]
+    mov [rbx], rax
+
+upload_matr:
+    ; rbx - массив указателей на строки
+    mov ecx, [n]
+    mov r8, rcx
+    shl r8, 3 ; r8 размер одной строки
+    mov rsi, rbx 
+    mov rdi, res_m
+    ; rsi - массив адресов строк
+    ; rdi - полученная матрица
+upload_line:
+    push rcx
+    push rsi
+    mov ecx, [m]
+    mov rsi, [rsi]
+upload_elem:
+    ; rsi - адрес начала строки
+    ; rax - индекс элемента в строке
+    mov r9, [rsi]
+    mov [rdi], r9
+    add rdi, 8 ; увеличили адрес вставки
+    add rsi, 8
+    loop upload_elem
+    pop rcx
+    pop rsi
+    add rsi, r8
+    loop upload_line
 
 exit_program:
     mov rax, 60
     xor rdi, rdi
     syscall
-
-heapify:
-    push rbp
-    mov rbp, rsp
-
-	push rbx
-    push r12
-
-    mov rax, rdx
-    mov rbx, rax
-    shl rbx, 1
-    inc rbx
-    mov r12, rbx
-    inc r12
-
-    cmp rbx, rcx
-    jge .no_left_child
-    mov r8, [rsi + rax * 8]
-    mov r9, [rsi + rbx * 8]
-    call cmp_lines
-    test al, al
-    jz .no_left_child
-    mov rax, rbx
-
-.no_left_child:
-    cmp r12, rcx
-    jge .no_right_child
-    mov r8, [rsi + rax * 8]
-    mov r9, [rsi + r12 * 8]
-    call cmp_lines
-    test al, al
-    jz .no_right_child 
-    mov rax, r12
-
-.no_right_child:
-    cmp rax, rdx
-    je .done
-
-    mov r8, [rsi + rdx * 8]
-    mov r9, [rsi + rax * 8]
-    mov [rsi + rdx * 8], r9
-    mov [rsi + rax * 8], r8
-
-    mov rdx, rax
-    call heapify
-
-.done:
-    pop r12
-    pop rbx
-    pop rbp
-    ret
-
-heap_sort:
-    push rbp
-    mov rbp, rsp
-
-    mov rdx, rcx
-    shr rdx, 1
-    dec rdx
-
-.build_heap:
-    cmp rdx, 0
-    jl .heap_built
-    call heapify
-    dec rdx
-    jmp .build_heap
-
-.heap_built:
-    mov rdx, rcx
-    dec rdx
-
-.extract:
-    cmp rdx, 0
-    jle .done
-
-    mov r8, [rsi]
-    mov r9, [rsi + rdx * 8]
-    mov [rsi], r9
-    mov [rsi + rdx * 8], r8
-
-    dec rdx
-    call heapify
-
-    jmp .extract
-
-.done:
-    pop rbp
-    ret
-
-cmp_lines:
-    push rcx
-    push rdx
-	push rbx
-
-    movzx rcx, byte [m]
-    xor rax, rax
-	xor rbx, rbx
-    xor rdx, rdx
-sum_line1:
-    add rax, [r8 + rdx * 8]
-    inc rdx
-    loop sum_line1
-
-    movzx rcx, byte [m]
-    xor rdx, rdx
-sum_line2:
-    add rbx, [r9 + rdx * 8]
-	inc rdx
-    loop sum_line2
-
-    cmp rax, rbx
-    jg .greater
-    jl .less
-    xor al, al
-    jmp .done_cmp
-
-.greater:
-    mov al, [sort_order]
-    jmp .done_cmp
-
-.less:
-    mov al, 1
-    sub al, [sort_order]
-
-.done_cmp:
-	pop rbx
-    pop rdx
-    pop rcx
-    ret

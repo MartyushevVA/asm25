@@ -4,7 +4,7 @@ LD = /usr/bin/ld
 ASFLAGS = -g -f elf64
 LDFLAGS = -g -static
 
-SRCS = sample.s
+SRCS = prog.s
 OBJS = $(SRCS:.s=.o)
 
 EXE = prog
