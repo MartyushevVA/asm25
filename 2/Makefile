@@ -4,7 +4,13 @@ LD = /usr/bin/ld
 ASFLAGS = -g -f elf64
 LDFLAGS = -g -static
 
-SRCS = prog.s
+LTOG=0
+ifeq ($(LTOG), 1)
+    SRCS = $(PROJ_SRC)prog.s
+else
+    SRCS = $(PROJ_SRC)progr.s
+endif
+
 OBJS = $(SRCS:.s=.o)
 
 EXE = prog

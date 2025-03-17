@@ -94,12 +94,12 @@ check:
 
     mov r10, [rdx + rcx * 8]
     cmp r10, [rdx + rcx * 8 + 8]
-    jge succ_comp
+    jle succ_comp
     inc rcx
 
 succ_comp:
     cmp r12, [rdx + rcx * 8]
-    jge curr_save
+    jle curr_save
 
     mov r10, [rbx + rcx * 8]
     mov [rbx + rsi * 8], r10
@@ -149,7 +149,7 @@ overflow_error:
 first_second_comp:
     mov rax, [rdx]
     cmp rax, [rdx + 8]
-    jle exit_program
+    jge exit_program
     mov rax, [rbx]
     xchg rax, [rbx + 8]
     mov [rbx], rax
