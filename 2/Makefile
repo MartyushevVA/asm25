@@ -4,11 +4,11 @@ LD = /usr/bin/ld
 ASFLAGS = -g -f elf64
 LDFLAGS = -g -static
 
-LTOG=0
-ifeq ($(LTOG), 1)
-    SRCS = $(PROJ_SRC)prog.s
-else
+DSC=0
+ifeq ($(DSC), 1)
     SRCS = $(PROJ_SRC)progr.s
+else
+    SRCS = $(PROJ_SRC)prog.s
 endif
 
 OBJS = $(SRCS:.s=.o)
