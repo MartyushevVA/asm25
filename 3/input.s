@@ -74,18 +74,12 @@ _start:
     mov edx, size
     syscall
     test eax, eax
-    jle .close_file
+    jle .close_file     ; если чтение вернуло 0 или меньше, значит, EOF или ошибка
 
-
-
-    mov rdi, newstr        ; Адрес нового буфера для строки
-    mov rsi, str           ; Адрес исходной строки
-    mov rdx, delim         ; Адрес разделителей (пробел, табуляция)
-    call work              ; Вызов функции для обработки строки
-
-
-
-
+    mov rdi, newstr     ; Адрес нового буфера для строки
+    mov rsi, str        ; Адрес исходной строки
+    mov rdx, delim      ; Адрес разделителей (пробел, табуляция)
+    call work           ; Вызов функции для обработки строки
 
     ; write to stdout
     mov edx, eax
@@ -93,7 +87,7 @@ _start:
     mov edi, 1
     mov rsi, newstr
     syscall
-    jmp .read_loop
+    jmp .read_loop      ; продолжение чтения строк
 
 .close_file:
     ; write("\n")
@@ -108,6 +102,7 @@ _start:
     mov edi, ebx
     syscall
     jmp .exit
+
 
 .error_open:
     mov eax, eax
@@ -153,8 +148,6 @@ del equ res + 8          ; Указатель на массив разделит
 w equ del + 8 * size / 2 ; Указатель на память для хранения слов в строке (включая размер)
 wl equ w + 4 * size / 2 ; Память для хранения длины слов
 n equ wl + 4            ; Память для хранения количества слов в строке
-
-
 
 work:
     push rbp               ; Сохраняем базовый указатель
@@ -260,7 +253,7 @@ work:
     loop .insert_word              ; Если ещё есть слова — повторяем
 
 .empty_row:
-    mov byte [rdi], 10     ; Завершаем строку символом новой строки
+    ;mov byte [rdi], 10     ; Завершаем строку символом новой строки
     pop rbx                ; Восстанавливаем rbx
     leave                  ; Восстанавливаем стек
     ret
@@ -273,7 +266,7 @@ is_digit_word:
     mov al, [rdi]         ; Берём символ
     inc rdi
     sub al, '0'
-    cmp al, 10
+    cmp al, 9
     ja .not_digit         ; Если не цифра — выходим
     dec esi
     jnz .check_loop       ; Если не конец слова — повторить
