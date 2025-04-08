@@ -2,7 +2,7 @@ bits 64
 
 section .data
 
-size equ 1024   
+size equ 4096
 
 prompt:     db "Enter filename: ", 0
 promptlen: equ $ - prompt
@@ -160,14 +160,15 @@ work:
     mov [rbp - sou], rsi    ; Указатель на исходную строку
     mov [rbp - res], rdi    ; Указатель на новый буфер для результата
     mov [rbp - del], rdx    ; Указатель на разделители
+    mov r8d, eax           ; Количество символов в буфере
+    xor r9d, r9d           ; Количество символов обработано   
     xor ebx, ebx           ; Счётчик для символов в словах
     xor ecx, ecx           ; Счётчик для слов
 
 .another_symb:
     mov al, [rsi]          ; Берем символ из строки
+    inc r9d
     inc rsi                ; Инкрементируем указатель на символ
-    cmp al, 10             ; Проверка на символ новой строки
-    je .word_process                 ; Если символ новой строки, переходим к обработке слова
 
     mov rdi, [rbp - del]   ; Указатель на разделители
 .delim_cycle:
@@ -185,8 +186,9 @@ work:
     mov [rbp - w + rcx * 8], rsi ; Записываем начало слова
     dec qword [rbp - w + rcx * 8] ; Уменьшаем счетчик
 .not_first_let_in_word:
-    inc ebx                ; Увеличиваем количество букв в слове
-    jmp .another_symb
+    inc ebx                ; Увеличиваем количество букв в слове    
+    cmp r9d, r8d             ; Проверка на конец строки
+    jne .another_symb
 
 .word_process:
     or ebx, ebx            ; Проверка на пустое слово
@@ -216,7 +218,7 @@ work:
     xor ebx, ebx ; не записываем длину, не увеличиваем количесвто слов
 
 .empty_word:
-    cmp al, 10             ; Проверка на конец строки
+    cmp r9d, r8d             ; Проверка на конец строки
     jne .another_symb                ; Если не конец, продолжаем
 
 ;строка закончилась
@@ -253,7 +255,6 @@ work:
     loop .insert_word              ; Если ещё есть слова — повторяем
 
 .empty_row:
-    ;mov byte [rdi], 10     ; Завершаем строку символом новой строки
     pop rbx                ; Восстанавливаем rbx
     leave                  ; Восстанавливаем стек
     ret
