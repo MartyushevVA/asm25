@@ -4,7 +4,7 @@ LD = /usr/bin/ld
 ASFLAGS = -g -f elf64
 LDFLAGS = -g -static
 
-SRCS = $(PROJ_SRC)input.s
+SRCS = $(PROJ_SRC)prog.s
 
 OBJS = $(SRCS:.s=.o)
 

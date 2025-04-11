@@ -254,6 +254,7 @@ is_digit_word:
     sub al, '0'
     cmp al, 9
     ja .not_digit
+    jb .not_digit
     dec esi
     jnz .check_loop
     mov eax, 1
