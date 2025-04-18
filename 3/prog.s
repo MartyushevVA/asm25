@@ -52,7 +52,6 @@ _start:
     xor rbx, rbx
 
 .read_char:
-    ; читаем по 1 байту
     mov eax, 0
     mov rsi, chr
     mov edx, 1
@@ -92,14 +91,12 @@ _start:
     push rax
     call work
 
-    ; вывод результата
-    mov edx, eax     ; длина новой строки
+    mov edx, eax
     mov eax, 1
     mov edi, 1
     mov rsi, str
     syscall
 
-    ; вывод \n
     mov eax, 1
     mov edi, 1
     mov rsi, newline
@@ -128,9 +125,9 @@ _start:
     xor edi, edi
     syscall
 
-; rsi — адрес строки
-; rdx — длина строки
-; возвращает в rax новую длину строки (строка перезаписана в rsi)
+; rsi - адрес строки
+; rdx - длина строки
+; rax - новая длина строки
 
 work:
     push rbp
@@ -141,13 +138,13 @@ work:
     push rcx
     push rdx
 
-    mov rdi, rsi        ; rdi — текущая строка
-    lea rbx, [rsi]      ; rbx — исходный указатель
-    mov rcx, rdx        ; rcx — длина строки
-    xor r8, r8          ; r8 — длина текущего слова
-    xor r9, r9          ; r9 — указатель на начало слова
-    xor r10, r10        ; r10 — позиция записи
-    xor r11, r11        ; флаг: не первая печать слова
+    mov rdi, rsi
+    lea rbx, [rsi]
+    mov rcx, rdx
+    xor r8, r8
+    xor r9, r9
+    xor r10, r10
+    xor r11, r11
 
 .next_char:
     
@@ -232,7 +229,6 @@ work:
 
 .done:
     mov rax, r10
-
     pop rdx
     pop rcx
     pop rdi
