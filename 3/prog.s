@@ -1,14 +1,16 @@
 bits 64
 
 section .data
-size equ 4096
+size equ 20
 
 prompt:     db "Enter filename: ", 0
 promptlen:  equ $ - prompt
 
 newline:    db 10
 nofile:     db "No such file or directory", 10
+toobig:     db "The string is too big for current buffer", 10
 nofilelen:  equ $ - nofile
+toobiglen:  equ $ - toobig
 
 filename:   times 256 db 0
 
@@ -68,6 +70,10 @@ _start:
     je .process_line
     cmp rbx, size
     jb .read_char
+    jmp .error_bufsize
+
+
+
 
 .process_line:
     cmp rbx, 1
@@ -118,6 +124,13 @@ _start:
     mov edi, 2
     mov rsi, nofile
     mov edx, nofilelen
+    syscall
+
+.error_bufsize:
+    mov eax, 1
+    mov edi, 2
+    mov rsi, toobig
+    mov edx, toobiglen
     syscall
 
 .exit:
