@@ -117,8 +117,8 @@ main:
     mov eax, 1
     call printf
 
-    mov rdi, [file_ptr]
-    call fclose
+    ; mov rdi, [file_ptr]
+    ; call fclose
     jmp .exit
 
 .sqrt_fail:
@@ -133,6 +133,8 @@ main:
     call printf
 
 .exit:
+    mov rdi, [file_ptr]
+    call fclose
     leave
     xor eax, eax
     ret
