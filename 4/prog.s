@@ -7,6 +7,11 @@ section .data
     sqrt_fmt:   db "sqrt: domain error", 10, 0
     fopen_err:  db "Failed to open output file.", 10, 0
 
+
+    one: dq 1.0                  ; 1.0
+    mode_write: db "w", 0         ; режим записи
+
+
 section .bss
     file_ptr resq 1
     x resq 1
@@ -46,9 +51,9 @@ main:
     ; вычисление точного значения f(x) = 1 / ((1 - x^2) * sqrt(1 - x^2))
     movsd xmm0, [x]
     mulsd xmm0, xmm0            ; xmm0 = x^2
-    movsd xmm1, qword [one]
-    subsd xmm1, xmm0            ; xmm1 = 1 - x^2
-    movsd xmm2, xmm1
+    movsd xmm2, qword [one]
+    subsd xmm2, xmm0            ; xmm1 = 1 - x^2
+    movsd xmm0, xmm2
     call sqrt                   ; xmm0 = sqrt(1 - x^2)
     test eax, eax
     jp .sqrt_fail
@@ -153,6 +158,3 @@ main:
     xor eax, eax
     ret
 
-section .data
-    one: dq 1.0                  ; 1.0
-    mode_write: db "w", 0         ; режим записи
