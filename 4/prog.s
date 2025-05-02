@@ -1,10 +1,10 @@
 section .data
     prompt:     db "Input x and epsilon: ", 0
     fmt_scan:   db "%lf %lf", 0
-    fmt_print:  db "f(x) (formula): %.9lf", 10, 0
-    fmt_print2: db "f(x) (series):  %.9lf", 10, 0
+    fmt_print:  db "Formula: %.9lf", 10, 0
+    fmt_print2: db "Series:  %.9lf", 10, 0
     fmt_term:   db "%d %.10g", 10, 0
-    sqrt_fmt:   db "sqrt: domain error", 10, 0
+    sqrt_fmt:   db "sqrt: value error", 10, 0
     fopen_err:  db "Failed to open output file.", 10, 0
     one: dq 1.0
     mode_write: db "w", 0
