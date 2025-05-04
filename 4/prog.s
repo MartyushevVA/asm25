@@ -116,9 +116,6 @@ main:
     movsd xmm0, [sum]
     mov eax, 1
     call printf
-
-    ; mov rdi, [file_ptr]
-    ; call fclose
     jmp .exit
 
 .sqrt_fail:
