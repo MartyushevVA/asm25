@@ -46,7 +46,11 @@ int main(int argc, char* argv[]) {
     }
 
     BMPHeader header;
-    fread(&header, sizeof(BMPHeader), 1, input);
+    if (fread(&header, sizeof(BMPHeader), 1, input) != 1) {
+        printf("Error: Failed to read BMP header\n");
+        fclose(input);
+        return 1;
+    }
 
     if (header.bitsPerPixel != 24) {
         printf("Only 24-bit BMP images are supported\n");
@@ -56,15 +60,17 @@ int main(int argc, char* argv[]) {
 
     unsigned char* imageData = (unsigned char*)malloc(header.imageSize);
     fseek(input, header.dataOffset, SEEK_SET);
-    fread(imageData, 1, header.imageSize, input);
-    fclose(input);
+    if (fread(imageData, 1, header.imageSize, input) != header.imageSize) {
+        printf("Error: Failed to read image data\n");
+        fclose(input);
+        free(imageData);
+        return 1;
+    }fclose(input);
 
-    // Process image
-    if (mode == 0) {
+    if (mode == 0)
         processImageC(imageData, header.width, header.height, channel);
-    } else {
+    else
         processImageASM(imageData, header.width, header.height, channel);
-    }
 
     FILE* output = fopen(argv[2], "wb");
     if (!output) {
@@ -87,7 +93,7 @@ void processImageC(unsigned char* image, int width, int height, int channel) {
     int padding = (4 - (width * 3) % 4) % 4;
     int rowSize = width * 3 + padding;
 
-    for (int y = 0; y < height; y++) {
+    for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++) {
             int offset = y * rowSize + x * 3;
             unsigned char gray = image[offset + channel];
@@ -95,5 +101,4 @@ void processImageC(unsigned char* image, int width, int height, int channel) {
             image[offset + 1] = gray; // G
             image[offset + 2] = gray; // R
         }
-    }
 }

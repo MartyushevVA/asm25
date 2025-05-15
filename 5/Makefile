@@ -1,6 +1,6 @@
 CC=gcc
 ASM=nasm
-CFLAGS=-O0 -Wall -fno-stack-protector -z noexecstack
+CFLAGS?=-O0 -Wall -fno-stack-protector -z noexecstack
 ASMFLAGS=-f elf64
 
 all: prog
