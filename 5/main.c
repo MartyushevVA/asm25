@@ -97,8 +97,8 @@ void processImageC(unsigned char* image, int width, int height, int channel) {
         for (int x = 0; x < width; x++) {
             int offset = y * rowSize + x * 3;
             unsigned char gray = image[offset + channel];
-            image[offset] = gray;     // B
-            image[offset + 1] = gray; // G
-            image[offset + 2] = gray; // R
+            image[offset] = gray;
+            image[offset + 1] = gray;
+            image[offset + 2] = gray;
         }
 }
